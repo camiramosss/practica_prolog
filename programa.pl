@@ -384,3 +384,305 @@ puedeSubir(Persona, Atraccion):-
     juego(Atraccion, _),
     pasaporte(Persona, premium).
 */
+
+/************************************PARCIAL 31 MINUTOS*****************************
+% Cancion, Compositores,  Reproducciones
+cancion(bailanSinCesar, [pabloIlabaca, rodrigoSalinas], 10600177).
+cancion(yoOpino, [alvaroDiaz, carlosEspinoza, rodrigoSalinas, theWeeknd], 5209110).
+cancion(equilibrioEspiritual, [danielCastro, alvaroDiaz, pabloIlabaca, pedroPeirano, rodrigoSalinas], 12052254).
+cancion(tangananicaTanganana, [danielCastro, pabloIlabaca, pedroPeirano], 5516191).
+cancion(dienteBlanco, [danielCastro, pabloIlabaca, pedroPeirano], 5872927). 
+cancion(lala, [pabloIlabaca, pedroPeirano], 5100530).
+cancion(meCortaronMalElPelo, [danielCastro, alvaroDiaz, pabloIlabaca, rodrigoSalinas], 3428854).
+
+% Mes, Puesto, Cancion
+rankingTop3(febrero, 1, lala).
+rankingTop3(febrero, 2, tangananicaTanganana).
+rankingTop3(febrero, 3, meCortaronMalElPelo).
+rankingTop3(marzo, 1, meCortaronMalElPelo).
+rankingTop3(marzo, 2, tangananicaTanganana).
+rankingTop3(marzo, 3, lala).
+rankingTop3(abril, 1, tangananicaTanganana).
+rankingTop3(abril, 2, dienteBlanco).
+rankingTop3(abril, 3, equilibrioEspiritual).
+rankingTop3(mayo, 1, meCortaronMalElPelo).
+rankingTop3(mayo, 2, dienteBlanco).
+rankingTop3(mayo, 3, equilibrioEspiritual).
+rankingTop3(junio, 1, dienteBlanco).
+rankingTop3(junio, 2, tangananicaTanganana).
+rankingTop3(junio, 3, lala).
+
+%PUNTO 1
+%cancion(Nombre,Compositores,Reproducciones),
+hit(Cancion):-
+    cancion(Cancion,_,_),
+    forall(rankingTop3(Mes,_,_), rankingTop3(Mes,_,Cancion)).
+
+%PUNTO 2
+noEsReconocidaPorCriticos(Cancion):-
+    cancion(Cancion, _, Reproducciones),
+    not(rankingTop3(_,_,Cancion)),
+    Reproducciones >  7000000.
+
+%PUNTO 3
+sonColaboradores(Compositor1, Compositor2) :-
+    cancion(_,Compositores,_),
+    member(Compositor1, Compositores),
+    member(Compositor2, Compositores).
+
+%PUNTO 4
+% trabajador(nombre,conductor(anios)).
+% trabajador(nombre,periodista(anios, titulo)).
+% trabajador(nombre,reportero(anios, notas)).
+
+trabajador(tulio, conductor(5)).
+trabajador(bodoque, periodista(2,licenciatura)).
+trabajador(bodoque,reportero(5,300)).
+trabajador(marioHugo, periodista(10,posgrado)).
+trabajador(juanin, conductor(0)).
+
+%PUNTO 5
+sueldoTotal(Trabajador, SueldoTotal):-
+    trabajador(Trabajador, _),
+    findall(Sueldo, sueldoPorTrabajo(Trabajador, Sueldo), ListaDeSueldos),
+    sumlist(ListaDeSueldos, SueldoTotal).
+
+
+sueldoPorTrabajo(Trabajador,Sueldo):-
+    trabajador(Trabajador, conductor(Anios)),
+    Sueldo is Anios * 1000.
+
+sueldoPorTrabajo(Trabajador, Sueldo):-
+    trabajador(Trabajador, reportero(Anios, Notas)),
+    Sueldo is (Anios * 1000) + (Notas * 100).
+
+sueldoPorTrabajo(Trabajador, Sueldo):-
+    trabajador(Trabajador, periodista(Anios, licenciatura)),
+    Sueldo is (Anios * 5000) + ((Anios * 5000) * 0.2).
+
+sueldoPorTrabajo(Trabajador, Sueldo):-
+    trabajador(Trabajador, periodista(Anios, posgrado)),
+    Sueldo is (Anios * 5000) + ((Anios * 5000) * 0.35).
+
+%PUNTO 6
+trabajador(joako, ingeniero(0, sistemas)).
+trabajador(joako, amanteDeSuNovia(6)).
+
+sueldoPorTrabajo(Trabajador,Sueldo):-
+    trabajador(Trabajador, ingeniero(Anios, sistemas)),
+    Sueldo is 10000000 + Anios * 0.1.
+
+sueldoPorTrabajo(Trabajador,Sueldo):-
+    trabajador(Trabajador, amanteDeSuNovia(Meses)),
+    Sueldo is Meses * 99999999999999999999999999.
+*/
+/**************************************************PARCIAL MOTIVACIONES PIRAMIDALES********************************************
+%PUNTO 1
+necesidad(respiracion, fisiologico).
+necesidad(alimentacion, fisiologico).
+necesidad(descanso, fisiologico).
+necesidad(reproduccion, fisiologico).
+
+necesidad(integridadFisica, seguridad).
+necesidad(empleo, seguridad).
+necesidad(salud, seguridad).
+
+necesidad(amistad, social).
+necesidad(afecto, social).
+necesidad(intimidad, social).
+
+necesidad(confianza, reconocimiento).
+necesidad(respeto, reconocimiento).
+necesidad(exito, reconocimiento).
+
+necesidad(empatia, autorrealizacion).
+necesidad(ego, autorrealizacion).
+necesidad(esencia, autorrealizacion).
+
+nivelSuperior(autorrealizacion, reconocimiento).
+nivelSuperior(reconocimiento, social).
+nivelSuperior(social, seguridad).
+nivelSuperior(seguridad, fisiologico).
+
+%PUNTO 2
+separacionEntreNecesidades(Necesidad1, Necesidad2, Niveles):-
+    necesidad(Necesidad1,Nivel1),
+    necesidad(Necesidad2,Nivel2),
+    separacionNiveles(Nivel1, Nivel2, Niveles).
+
+
+separacionNiveles(Nivel, Nivel, 0).
+separacionNiveles(Nivel1,Nivel2,Separacion):-
+    nivelSuperior(Nivel2,NivelIntermedio),
+    separacionNiveles(Nivel1,NivelIntermedio,SepAnterior),
+    Separacion is SepAnterior + 1.
+
+%PUNTO 3
+necesita(carla, alimentacion).
+necesita(carla, descansar).
+necesita(carla, empleo).
+necesita(juan, afecto).
+necesita(juan, exito).
+necesita(camila, alimentacion).
+necesita(camila, descanso).
+necesita(roberto, amistad).
+necesita(manuel, libertad).
+necesita(charly, afecto).
+
+%PUNTO 4
+necesidadMayorJerarquia2(Persona,Necesidad):-
+    jerarquiaNecesidad(Persona,Necesidad,JerarquiaMax),
+    forall(jerarquiaNecesidad(Persona,_,OtraJerarquia), JerarquiaMax >= OtraJerarquia).    
+
+jerarquiaNecesidad(Persona,Necesidad,Jerarquia):-
+    necesita(Persona,Necesidad),
+    necesidad(Necesidad,Nivel),
+    nivelBasico(NivelBasico),
+    separacionNiveles(NivelBasico,Nivel,Jerarquia).
+
+nivelBasico(Nivel):-
+    nivelSuperior(_,Nivel),
+    not(nivelSuperior(Nivel,_)).
+
+%PUNTO 5
+nivel(Nivel):- necesidad(_,Nivel).
+persona(Persona):- necesita(Persona,_).
+
+nivelSatisfecho(Persona,Nivel):-
+    persona(Persona),
+    nivel(Nivel),
+    not(nivelConNecesidades(Persona,Nivel)).
+
+nivelConNecesidades(Persona,Nivel):-
+    necesita(Persona,Necesidad),
+    necesidad(Necesidad,OtroNivel),
+    separacionNiveles(OtroNivel,Nivel,_).
+
+%PUNTO 7
+cumpleMaslow(Persona):-
+    necesita(Persona,Necesidad),
+    forall(necesita(Persona,OtraNecesidad),mismoNivel(Necesidad,OtraNecesidad)).
+
+mismoNivel(Necesidad,OtraNecesidad):-separacionEntre(Necesidad,OtraNecesidad,0).
+
+noCumpleMaslow(Persona):-
+    persona(Persona),
+    necesita(Persona,Necesidad1),
+    necesita(Persona,Necesidad2),
+    separacionEntre(Necesidad1,Necesidad2,Separacion),
+    Separacion > 1.
+ 
+cumpleMaslowTodos:-
+    not(noCumpleMaslow(_)).
+cumpleMaslowTodos1:-
+    forall(persona(Persona),cumpleMaslow(Persona)).
+*/
+
+/****************************************PARCIAL INFLUENCERS******************************
+usuario(ana, youtube, 3000000).
+usuario(ana, instagram, 2700000).
+usuario(ana, tiktok, 1000000).
+usuario(ana, twitch, 2).
+usuario(beto, youtube, 6000000).
+usuario(beto, twitch, 120000).
+usuario(beto, instagram, 1100000).
+usuario(cami, tiktok,2000).
+usuario(dani, youtube,100000).
+usuario(evelyn, instagram, 1).
+
+influencer(Persona):-
+    usuario(Persona, _, _),
+    findall(Seguidores, usuario(Persona,_, Seguidores), ListaDeSeguidores),
+    ListaDeSeguidores > 10000.
+
+omnipresente(Persona):-
+    usuario(Persona, _, _),
+    forall(usuario(_, Red, _), usuario(Persona, Red, _)).
+
+exclusive(Persona):-
+    usuario(Persona, RedUnica, _),
+    forall((usuario(Persona,Red,_), Red \= RedUnica), not(usuario(Persona, Red, _))).
+
+%PUNTO 3
+% contenido(persona, redSocial, video(personas,duracion)).
+% contenido(persona, redSocial, foto(personas)).
+% contenido(persona, redSocial, stream(tematica)).
+
+contenido(ana, tiktok, video([beto,elevyn], 1)).
+contenido(ana, tiktok, video([ana], 1)).
+contenido(ana, instagram, foto([ana])).
+contenido(beto, instagram, foto([])).
+contenido(cami, twitch, stream(lol)).
+contenido(cami, youtube, video([cami], 5)).
+contenido(evelyn, instagram, foto([evelyn, cami])).
+
+tematica(lol).
+tematica(minecraft).
+tematica(aoe).
+
+%PUNTO 4
+adictiva(RedSocial) :-
+    contenido(_,RedSocial, video([_], Duracion)),
+    Duracion < 3.
+
+adictiva(RedSocial):-
+    contenido(_,RedSocial, foto(Personas)),
+    length(Personas, TotalPersonas),
+    TotalPersonas =< 4.
+
+adictiva(RedSocial):-
+    contenido(_, RedSocial, stream(_)).
+
+%PUNTO 5
+puedenColaborar(Persona1, Persona2):-
+    usuario(Persona2, _,_),
+    contenido(Persona1,_, video(Participantes,_)),
+    member(Persona2,Participantes),
+    Persona1 \= Persona2.
+
+puedenColaborar(Persona1, Persona2):-
+    usuario(Persona2,_,_),
+    contenido(Persona1,_, foto(Participantes)),
+    member(Persona2, Participantes),
+    Persona1 \= Persona2.
+
+colaboran(Persona1,Persona2) :- puedenColaborar(Persona1, Persona2).
+colaboran(Persona1, Persona2) :- puedenColaborar(Persona2, Persona1).
+
+%PUNTO 6
+caminoALaFama(Usuario):-
+    influencer(Influencer),
+    puedenColaborar(Influencer,Usuario).
+
+caminoALaFama(Usuario) :-
+    usuario(Usuario2,_,_),
+    puedenColaborar(Usuario2,Usuario),
+    caminoALaFama(Usuario2).
+
+% caminoALaFama(Persona):-
+%     not(influencer(Persona)),
+%     influencer(Influencer),
+%     contenido(Influencer,_,foto(Participantes)),
+%     member(Persona,Participantes).
+
+% caminoALaFama(Persona) :-
+%     not(influencer(Persona)),
+%     usuario(PersonaIntermedia,_,_),
+%     contenido(PersonaIntermedia, _, foto(Participantes)),
+%     member(Persona,Participantes),
+%     caminoALaFama(PersonaIntermedia).
+
+% caminoALaFama(Persona):-
+%     not(influencer(Persona)),
+%     influencer(Influencer),
+%     contenido(Influencer,_,video(Participantes,_)),
+%     member(Persona,Participantes).
+
+% caminoALaFama(Persona) :-
+%     not(influencer(Persona)),
+%     usuario(PersonaIntermedia,_,_),
+%     contenido(PersonaIntermedia, _, video(Participantes,_)),
+%     member(Persona,Participantes),
+%     caminoALaFama(PersonaIntermedia).
+*/
+
